@@ -1,0 +1,224 @@
+{
+  "name": "🚀 Live Trading Demo - BTC/USDT",
+  "description": "Impressive 24/7 automated trading demo for judges",
+  "type": "repeat",
+  "nodes": {
+    "price-feed": {
+      "type": "pyth-network",
+      "label": "🔴 Live BTC Price",
+      "position": { "x": 50, "y": 250 },
+      "inputs": {},
+      "outputs": { "price": { "type": "float" } },
+      "node_data": {
+        "type": "pyth-network",
+        "id": "price-feed",
+        "priceFeedId": "0xe62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43",
+        "pythUpdateContractAddress": "0xDd24F84d36BF92C65F92307595335bdFab5Bbd21"
+      }
+    },
+    "ai-vision": {
+      "type": "visionAnalysis",
+      "label": "🤖 AI Chart Analysis",
+      "position": { "x": 350, "y": 100 },
+      "inputs": { "price": { "type": "float" } },
+      "outputs": { "analysis": { "type": "string" }, "sentiment": { "type": "string" } },
+      "node_data": {
+        "type": "visionAnalysis",
+        "id": "ai-vision",
+        "prompt": "You are an AGGRESSIVE crypto trader analyzing BTC charts. Be DECISIVE and take action! Look for ANY tradeable patterns - breakouts, reversals, support/resistance bounces. Current market conditions favor active trading. Give clear BUY or SELL signals with strong conviction. Only say HOLD if absolutely no opportunity exists.",
+        "persona": "aggressive",
+        "analysisType": "chart",
+        "apiProvider": "gemini"
+      }
+    },
+    "news-sentiment": {
+      "type": "newsPrediction",
+      "label": "📰 News Sentiment AI",
+      "position": { "x": 350, "y": 400 },
+      "inputs": { "price": { "type": "float" } },
+      "outputs": { "prediction": { "type": "string" }, "confidence": { "type": "float" } },
+      "node_data": {
+        "type": "newsPrediction",
+        "id": "news-sentiment",
+        "asset": "BTC",
+        "apiProvider": "gemini"
+      }
+    },
+    "trading-agent": {
+      "type": "tradingAgent",
+      "label": "🧠 Trading Decision AI",
+      "position": { "x": 700, "y": 250 },
+      "inputs": {
+        "price": { "type": "float" },
+        "analysis": { "type": "string" },
+        "sentiment": { "type": "string" },
+        "prediction": { "type": "string" }
+      },
+      "outputs": {
+        "signal": { "type": "string" },
+        "confidence": { "type": "float" },
+        "reasoning": { "type": "string" },
+        "shouldTrade": { "type": "boolean" }
+      },
+      "node_data": {
+        "type": "tradingAgent",
+        "id": "trading-agent",
+        "strategy": "aggressive",
+        "riskLevel": "high",
+        "apiProvider": "gemini"
+      }
+    },
+    "risk-manager": {
+      "type": "riskManager",
+      "label": "🛡️ Risk Manager",
+      "position": { "x": 1050, "y": 100 },
+      "inputs": {
+        "signal": { "type": "string" },
+        "confidence": { "type": "float" },
+        "price": { "type": "float" }
+      },
+      "outputs": {
+        "approved": { "type": "boolean" },
+        "adjustedSignal": { "type": "string" }
+      },
+      "node_data": {
+        "type": "riskManager",
+        "id": "risk-manager",
+        "maxDrawdown": "25",
+        "stopLoss": "3",
+        "takeProfit": "8"
+      }
+    },
+    "max-investment": {
+      "type": "maxInvestment",
+      "label": "💰 Position Sizer",
+      "position": { "x": 1050, "y": 400 },
+      "inputs": { "approved": { "type": "boolean" } },
+      "outputs": { "amount": { "type": "float" } },
+      "node_data": {
+        "type": "maxInvestment",
+        "id": "max-investment",
+        "maxInvestment": "100",
+        "positionSizing": "fixed"
+      }
+    },
+    "trade-condition": {
+      "type": "condition",
+      "label": "✅ Should Execute?",
+      "position": { "x": 1400, "y": 250 },
+      "inputs": {
+        "shouldTrade": { "type": "boolean" },
+        "approved": { "type": "boolean" }
+      },
+      "outputs": {
+        "true": { "type": "boolean" },
+        "false": { "type": "boolean" }
+      },
+      "node_data": {
+        "type": "condition",
+        "id": "trade-condition",
+        "condition": "shouldTrade && approved",
+        "operator": "custom"
+      }
+    },
+    "execute-swap": {
+      "type": "swap",
+      "label": "⚡ Execute Trade",
+      "position": { "x": 1750, "y": 100 },
+      "inputs": {
+        "amount": { "type": "float" },
+        "signal": { "type": "string" }
+      },
+      "outputs": { "txHash": { "type": "string" } },
+      "node_data": {
+        "type": "swap",
+        "id": "execute-swap",
+        "tokenIn": "0x0000000000000000000000000000000000000000",
+        "tokenOut": "0x0000000000000000000000000000000000000001",
+        "dex": "uniswap",
+        "slippage": "1"
+      }
+    },
+    "log-skip": {
+      "type": "log",
+      "label": "📝 Log Wait Signal",
+      "position": { "x": 1750, "y": 400 },
+      "inputs": { "reasoning": { "type": "string" } },
+      "outputs": {},
+      "node_data": {
+        "type": "log",
+        "id": "log-skip",
+        "message": "Trade skipped - waiting for better conditions"
+      }
+    },
+    "final-log": {
+      "type": "log",
+      "label": "✅ Trade Complete",
+      "position": { "x": 2100, "y": 250 },
+      "inputs": { "txHash": { "type": "string" } },
+      "outputs": {},
+      "node_data": {
+        "type": "log",
+        "id": "final-log",
+        "message": "Trade executed successfully!"
+      }
+    }
+  },
+  "edges": {
+    "price-feed": {
+      "ai-vision": { "price": "price" },
+      "news-sentiment": { "price": "price" },
+      "trading-agent": { "price": "price" },
+      "risk-manager": { "price": "price" }
+    },
+    "ai-vision": {
+      "trading-agent": {
+        "analysis": "analysis",
+        "sentiment": "sentiment"
+      }
+    },
+    "news-sentiment": {
+      "trading-agent": {
+        "prediction": "prediction"
+      }
+    },
+    "trading-agent": {
+      "risk-manager": {
+        "signal": "signal",
+        "confidence": "confidence"
+      },
+      "trade-condition": {
+        "shouldTrade": "shouldTrade"
+      },
+      "execute-swap": {
+        "signal": "signal"
+      },
+      "log-skip": {
+        "reasoning": "reasoning"
+      }
+    },
+    "risk-manager": {
+      "trade-condition": {
+        "approved": "approved"
+      }
+    },
+    "max-investment": {
+      "execute-swap": {
+        "amount": "amount"
+      }
+    },
+    "trade-condition": {
+      "execute-swap": {
+        "true": "true"
+      },
+      "log-skip": {
+        "false": "false"
+      }
+    },
+    "execute-swap": {
+      "final-log": {
+        "txHash": "txHash"
+      }
+    }
+  }
+}

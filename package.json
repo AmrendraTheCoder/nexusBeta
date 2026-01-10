@@ -1,0 +1,24 @@
+{
+  "name": "d8n-nexus",
+  "version": "1.0.0",
+  "description": "D8N + Nexus Ecosystem with NIP-1 SDK",
+  "scripts": {
+    "install:all": "npm install --prefix sdk/nip1-sdk && npm run build --prefix sdk/nip1-sdk && npm install --prefix backend && npm install --prefix frontend && npm install --prefix engine && npm install --prefix mock-provider",
+    "dev:backend": "npm run dev --prefix backend",
+    "dev:frontend": "npm run dev --prefix frontend",
+    "dev:engine": "npm run dev --prefix engine",
+    "dev:mock": "npm run dev --prefix mock-provider",
+    "dev:sdk-provider": "node sdk/nip1-sdk/examples/provider-express.js",
+    "start": "npx concurrently -n backend,frontend,engine,mock -c blue,green,yellow,magenta \"npm run dev:backend\" \"npm run dev:frontend\" \"npm run dev:engine\" \"npm run dev:mock\"",
+    "test:sdk": "npm test --prefix sdk/nip1-sdk",
+    "test:integration": "cd engine && tsx src/server.ts test-nexuspay-sdk.json",
+    "test:workflow1": "cd engine && tsx src/server.ts test-workflow-free.json",
+    "test:workflow2": "cd engine && tsx src/server.ts test-workflow-premium.json",
+    "test:workflow3": "cd engine && tsx src/server.ts test-workflow-mixed.json",
+    "test:all": "npm run test:sdk && npm run test:integration",
+    "setup": "npm install && npm run install:all"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

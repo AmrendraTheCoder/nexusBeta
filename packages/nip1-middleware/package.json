@@ -1,0 +1,22 @@
+{
+  "name": "@nexus/nip1-middleware",
+  "version": "1.0.0",
+  "description": "NIP-1 paywall middleware and client re-exports",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@nexus-ecosystem/nip1": "file:../../sdk/nip1-sdk"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ]
+}

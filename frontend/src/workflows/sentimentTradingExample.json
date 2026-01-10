@@ -1,0 +1,76 @@
+{
+  "name": "AI Sentiment Trading",
+  "description": "Trade based on Fear & Greed Index from AI sentiment API",
+  "type": "once",
+  "nodes": [
+    {
+      "id": "nexus-1",
+      "type": "custom",
+      "position": { "x": 100, "y": 100 },
+      "data": {
+        "label": "Get AI Sentiment",
+        "type": "nexusPay",
+        "inputs": { "activate": { "type": "bool" } },
+        "outputs": { "data": { "type": "object" }, "success": { "type": "bool" } },
+        "node_data": {
+          "url": "http://localhost:4000/api/sentiment/btc",
+          "method": "GET",
+          "chainId": 240,
+          "nexusBackendUrl": "http://localhost:3001"
+        }
+      }
+    },
+    {
+      "id": "cond-1",
+      "type": "custom",
+      "position": { "x": 450, "y": 100 },
+      "data": {
+        "label": "Is Greedy? (FGI > 60)",
+        "type": "condition",
+        "inputs": { "fearGreedIndex": { "type": "float" } },
+        "outputs": { "true-path": { "type": "bool" }, "false-path": { "type": "bool" } },
+        "node_data": {
+          "leftVariable": "fearGreedIndex",
+          "operator": "greaterThan",
+          "rightValue": "60"
+        }
+      }
+    },
+    {
+      "id": "swap-1",
+      "type": "custom",
+      "position": { "x": 700, "y": 0 },
+      "data": {
+        "label": "Buy ETH (Bullish)",
+        "type": "swap",
+        "inputs": { "activate": { "type": "bool" } },
+        "outputs": { "txHash": { "type": "string" } },
+        "node_data": {
+          "tokenIn": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+          "tokenOut": "0x7b79995e5f793A07Bc00c21412e50Ecae098E7f9",
+          "amountIn": "10000000",
+          "amountOutMin": "0"
+        }
+      }
+    },
+    {
+      "id": "print-1",
+      "type": "custom",
+      "position": { "x": 700, "y": 200 },
+      "data": {
+        "label": "Wait (Fearful)",
+        "type": "print",
+        "inputs": {},
+        "outputs": {},
+        "node_data": {
+          "message": "Market is fearful (FGI < 60). Waiting for better conditions."
+        }
+      }
+    }
+  ],
+  "edges": [
+    { "id": "e1", "source": "nexus-1", "target": "cond-1", "sourceHandle": "data", "targetHandle": "fearGreedIndex" },
+    { "id": "e2", "source": "cond-1", "target": "swap-1", "sourceHandle": "true-path", "targetHandle": "activate" },
+    { "id": "e3", "source": "cond-1", "target": "print-1", "sourceHandle": "false-path", "targetHandle": "activate" }
+  ]
+}

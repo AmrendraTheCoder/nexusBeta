@@ -1,0 +1,51 @@
+{
+  "name": "@nexus-ecosystem/nip1",
+  "version": "1.0.0",
+  "description": "Official SDK for implementing and consuming NIP-1 (Nexus Interface Protocol) payment-gated APIs",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "nip-1",
+    "nexus",
+    "payment",
+    "http-402",
+    "blockchain",
+    "web3",
+    "ai-agents",
+    "micropayments",
+    "cronos"
+  ],
+  "author": "Nexus Ecosystem Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nexus-ecosystem/nip1-sdk"
+  },
+  "dependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^20.19.27",
+    "axios": "^1.6.0",
+    "ethers": "^6.13.0",
+    "express": "^4.22.1",
+    "fastify": "^5.6.2",
+    "typescript": "^5.3.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.0"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ]
+}

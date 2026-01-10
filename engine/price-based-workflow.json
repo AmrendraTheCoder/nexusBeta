@@ -1,0 +1,42 @@
+{
+  "json_workflow": {
+    "nodes": [
+      {
+        "type": "pyth-network",
+        "id": "pyth-1",
+        "priceFeedId": "0xff61491a931112ddf1bd8147cd1b641375f79f5825126d665480874634fd0ace",
+        "pythUpdateContractAddress": "0xDd24F84d36BF92C65F92307595335bdFab5Bbd21"
+      },
+      {
+        "type": "condition",
+        "id": "cond-1",
+        "leftVariable": "pyth-1",
+        "operator": "greaterThan",
+        "rightValue": "3000"
+      },
+      {
+        "type": "sendToken",
+        "id": "send-high-price",
+        "tokenAddress": "native",
+        "to": "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb",
+        "amount": "0.001"
+      },
+      {
+        "type": "print",
+        "id": "print-high",
+        "message": "✅ ETH price > $3000! Sent 0.001 ETH"
+      },
+      {
+        "type": "print",
+        "id": "print-low",
+        "message": "⏭️ ETH price ≤ $3000, no action taken"
+      }
+    ],
+    "edges": [
+      { "source": "pyth-1", "target": "cond-1" },
+      { "source": "cond-1", "target": "send-high-price", "condition": "true" },
+      { "source": "send-high-price", "target": "print-high" },
+      { "source": "cond-1", "target": "print-low", "condition": "false" }
+    ]
+  }
+}

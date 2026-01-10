@@ -1,0 +1,109 @@
+{
+  "name": "AI Vision Trading Demo",
+  "description": "Upload a chart → AI Vision Analysis → Trading Agent → Risk Manager → Execute Trade",
+  "type": "once",
+  "category": "ai-trading",
+  "nodes": {
+    "vision-1": {
+      "position": { "x": 100, "y": 200 },
+      "label": "Vision AI Analysis",
+      "type": "visionAnalysis",
+      "node_data": {
+        "prompt": "Analyze this BTC/USD chart. Identify key support/resistance levels, trend direction, and provide a trading recommendation with entry, stop-loss, and take-profit levels.",
+        "persona": "default",
+        "analysisType": "chart",
+        "outputFormat": "both",
+        "apiProvider": "gemini"
+      },
+      "inputs": { "imageUrl": { "type": "string" }, "imageBase64": { "type": "string" } },
+      "outputs": { "analysis": { "type": "string" }, "sentiment": { "type": "string" }, "confidence": { "type": "float" }, "suggestedAction": { "type": "string" } }
+    },
+    "trading-1": {
+      "position": { "x": 450, "y": 150 },
+      "label": "AI Trading Agent",
+      "type": "tradingAgent",
+      "node_data": {
+        "symbol": "BTC",
+        "strategy": "ai-signal",
+        "riskLevel": "moderate",
+        "maxPositionSize": "0.1",
+        "stopLossPercent": 3,
+        "takeProfitPercent": 6
+      },
+      "inputs": { "prediction": { "type": "object" }, "price": { "type": "float" } },
+      "outputs": { "signal": { "type": "object" }, "action": { "type": "string" }, "shouldTrade": { "type": "bool" } }
+    },
+    "risk-1": {
+      "position": { "x": 450, "y": 350 },
+      "label": "Risk Manager",
+      "type": "riskManager",
+      "node_data": {
+        "maxPortfolioRisk": 20,
+        "maxSinglePositionSize": 10,
+        "maxDailyLoss": 5,
+        "maxOpenPositions": 3,
+        "minBalanceReserve": 30
+      },
+      "inputs": { "signal": { "type": "object" }, "trade": { "type": "object" } },
+      "outputs": { "approved": { "type": "bool" }, "adjustedSize": { "type": "string" }, "reason": { "type": "string" } }
+    },
+    "confirm-1": {
+      "position": { "x": 800, "y": 200 },
+      "label": "User Confirmation",
+      "type": "userConfirmation",
+      "node_data": {
+        "requireConfirmation": true,
+        "confirmationMethod": "popup",
+        "timeoutSeconds": 60,
+        "showDetails": true,
+        "minConfirmationDelay": 3
+      },
+      "inputs": { "trade": { "type": "object" }, "signal": { "type": "object" } },
+      "outputs": { "confirmed": { "type": "bool" } }
+    },
+    "maxinv-1": {
+      "position": { "x": 800, "y": 400 },
+      "label": "Max Investment Limit",
+      "type": "maxInvestment",
+      "node_data": {
+        "maxAmountPerTrade": "0.05",
+        "maxTotalExposure": "0.2",
+        "currency": "CRO",
+        "enforceLimit": true
+      },
+      "inputs": { "activate": { "type": "bool" } },
+      "outputs": { "approved": { "type": "bool" }, "adjustedAmount": { "type": "string" } }
+    },
+    "execute-1": {
+      "position": { "x": 1100, "y": 250 },
+      "label": "Execute Trade",
+      "type": "swap",
+      "node_data": {
+        "tokenIn": "0xCRO",
+        "tokenOut": "0xWBTC",
+        "amountIn": "0",
+        "amountOutMin": "0"
+      },
+      "inputs": { "activate": { "type": "bool" } },
+      "outputs": { "txHash": { "type": "string" } }
+    }
+  },
+  "edges": {
+    "vision-1": {
+      "trading-1": { "analysis": "prediction" },
+      "risk-1": { "confidence": "signal" }
+    },
+    "trading-1": {
+      "confirm-1": { "signal": "trade" }
+    },
+    "risk-1": {
+      "maxinv-1": { "approved": "activate" }
+    },
+    "confirm-1": {
+      "execute-1": { "confirmed": "activate" }
+    },
+    "maxinv-1": {
+      "execute-1": { "approved": "activate" }
+    }
+  }
+}

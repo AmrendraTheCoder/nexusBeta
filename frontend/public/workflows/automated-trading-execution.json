@@ -1,0 +1,205 @@
+{
+  "name": "24/7 Auto-Trade BTC (Full Automation)",
+  "description": "Fully automated BTC trading with actual execution",
+  "type": "repeat",
+  "repeatInterval": 300000,
+  "nodes": [
+    {
+      "id": "agent-price",
+      "type": "custom",
+      "position": { "x": 100, "y": 300 },
+      "data": {
+        "type": "pyth-network",
+        "label": "Price Feed",
+        "inputs": {},
+        "outputs": { "price": { "type": "float" } },
+        "node_data": {
+          "type": "pyth-network",
+          "id": "agent-price",
+          "priceFeedId": "0xe62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43",
+          "pythUpdateContractAddress": "0xDd24F84d36BF92C65F92307595335bdFab5Bbd21"
+        }
+      }
+    },
+    {
+      "id": "agent-vision",
+      "type": "custom",
+      "position": { "x": 350, "y": 200 },
+      "data": {
+        "type": "visionAnalysis",
+        "label": "AI Vision",
+        "inputs": { "price": { "type": "float" } },
+        "outputs": { "analysis": { "type": "string" }, "sentiment": { "type": "string" } },
+        "node_data": {
+          "type": "visionAnalysis",
+          "id": "agent-vision",
+          "prompt": "Analyze BTC for automated trading - be decisive",
+          "persona": "aggressive",
+          "analysisType": "chart",
+          "apiProvider": "gemini"
+        }
+      }
+    },
+    {
+      "id": "agent-news",
+      "type": "custom",
+      "position": { "x": 350, "y": 400 },
+      "data": {
+        "type": "newsPrediction",
+        "label": "News Analysis",
+        "inputs": { "price": { "type": "float" } },
+        "outputs": { "sentiment": { "type": "string" } },
+        "node_data": {
+          "type": "newsPrediction",
+          "id": "agent-news",
+          "symbol": "BTC",
+          "newsSource": "aggregated",
+          "lookbackHours": 24,
+          "includePatternAnalysis": true
+        }
+      }
+    },
+    {
+      "id": "agent-trader",
+      "type": "custom",
+      "position": { "x": 600, "y": 300 },
+      "data": {
+        "type": "tradingAgent",
+        "label": "Trading Agent",
+        "inputs": { "analysis": { "type": "string" }, "sentiment": { "type": "string" } },
+        "outputs": { "action": { "type": "string" }, "shouldTrade": { "type": "bool" } },
+        "node_data": {
+          "type": "tradingAgent",
+          "id": "agent-trader",
+          "symbol": "BTC",
+          "strategy": "ai-signal",
+          "riskLevel": "aggressive",
+          "maxPositionSize": "0.1",
+          "stopLossPercent": 5,
+          "takeProfitPercent": 10
+        }
+      }
+    },
+    {
+      "id": "agent-risk",
+      "type": "custom",
+      "position": { "x": 850, "y": 200 },
+      "data": {
+        "type": "riskManager",
+        "label": "Risk Check",
+        "inputs": { "shouldTrade": { "type": "bool" } },
+        "outputs": { "approved": { "type": "bool" } },
+        "node_data": {
+          "type": "riskManager",
+          "id": "agent-risk",
+          "maxPortfolioRisk": 50,
+          "maxSinglePositionSize": 20,
+          "maxDailyLoss": 10,
+          "maxOpenPositions": 5
+        }
+      }
+    },
+    {
+      "id": "agent-limit",
+      "type": "custom",
+      "position": { "x": 850, "y": 400 },
+      "data": {
+        "type": "maxInvestment",
+        "label": "Investment Limit",
+        "inputs": { "shouldTrade": { "type": "bool" } },
+        "outputs": { "approved": { "type": "bool" } },
+        "node_data": {
+          "type": "maxInvestment",
+          "id": "agent-limit",
+          "maxAmountPerTrade": "0.01",
+          "maxTotalExposure": "0.05",
+          "currency": "ETH",
+          "enforceLimit": true
+        }
+      }
+    },
+    {
+      "id": "condition-trade",
+      "type": "custom",
+      "position": { "x": 1100, "y": 300 },
+      "data": {
+        "type": "condition",
+        "label": "Should Trade?",
+        "inputs": { "shouldTrade": { "type": "bool" } },
+        "outputs": { "path": { "type": "string" } },
+        "node_data": {
+          "type": "condition",
+          "id": "condition-trade",
+          "leftVariable": "shouldTrade",
+          "operator": "equals",
+          "rightValue": "true"
+        }
+      }
+    },
+    {
+      "id": "swap-execute",
+      "type": "custom",
+      "position": { "x": 1350, "y": 200 },
+      "data": {
+        "type": "swap",
+        "label": "Execute Trade",
+        "inputs": { "activate": { "type": "bool" } },
+        "outputs": { "txHash": { "type": "string" } },
+        "node_data": {
+          "type": "swap",
+          "id": "swap-execute",
+          "dex": "1inch",
+          "fromToken": "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+          "toToken": "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
+          "amount": "0.001",
+          "slippage": "2"
+        }
+      }
+    },
+    {
+      "id": "log-success",
+      "type": "custom",
+      "position": { "x": 1600, "y": 200 },
+      "data": {
+        "type": "print",
+        "label": "✅ Trade Success",
+        "inputs": {},
+        "outputs": {},
+        "node_data": {
+          "type": "print",
+          "id": "log-success",
+          "message": "✅ Trade executed! Continuing monitoring..."
+        }
+      }
+    },
+    {
+      "id": "log-skip",
+      "type": "custom",
+      "position": { "x": 1350, "y": 400 },
+      "data": {
+        "type": "print",
+        "label": "⏭️ Skip Trade",
+        "inputs": {},
+        "outputs": {},
+        "node_data": {
+          "type": "print",
+          "id": "log-skip",
+          "message": "⏭️ No trade signal - waiting for next check..."
+        }
+      }
+    }
+  ],
+  "edges": [
+    { "id": "e1", "source": "agent-price", "target": "agent-vision" },
+    { "id": "e2", "source": "agent-price", "target": "agent-news" },
+    { "id": "e3", "source": "agent-vision", "target": "agent-trader" },
+    { "id": "e4", "source": "agent-news", "target": "agent-trader" },
+    { "id": "e5", "source": "agent-trader", "target": "agent-risk" },
+    { "id": "e6", "source": "agent-trader", "target": "agent-limit" },
+    { "id": "e7", "source": "agent-risk", "target": "condition-trade" },
+    { "id": "e8", "source": "agent-limit", "target": "condition-trade" },
+    { "id": "e9", "source": "condition-trade", "target": "swap-execute", "sourceHandle": "true" },
+    { "id": "e10", "source": "swap-execute", "target": "log-success" },
+    { "id": "e11", "source": "condition-trade", "target": "log-skip", "sourceHandle": "false" }
+  ]
+}

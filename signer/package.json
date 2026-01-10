@@ -1,0 +1,19 @@
+{
+  "name": "signer",
+  "version": "1.0.0",
+  "description": "Signer",
+  "main": "index.js",
+  "scripts": {
+    "test": "tsx ./example/oneinchLimitOrder.example.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@1inch/limit-order-sdk": "^5.2.0",
+    "axios": "^1.12.2",
+    "dotenv": "^17.2.2",
+    "tsx": "^4.20.6",
+    "viem": "^2.37.8"
+  }
+}

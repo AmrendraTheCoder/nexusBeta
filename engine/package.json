@@ -1,0 +1,36 @@
+{
+  "type": "module",
+  "devDependencies": {
+    "nodemon": "^3.1.11"
+  },
+  "dependencies": {
+    "@1inch/limit-order-sdk": "5.0.5",
+    "@google/generative-ai": "^0.24.1",
+    "@nexus-ecosystem/nip1": "file:../sdk/nip1-sdk",
+    "@pythnetwork/hermes-client": "^2.0.0",
+    "@pythnetwork/pyth-sdk-solidity": "^4.2.0",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.5.2",
+    "@x402/core": "^2.0.0",
+    "@x402/evm": "^2.0.0",
+    "axios": "^1.12.2",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.2",
+    "ethers": "5.7.2",
+    "expr-eval": "^2.0.2",
+    "express": "^5.1.0",
+    "mongodb": "^6.20.0",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.2",
+    "viem": "^2.37.8"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node ./dist/server.js",
+    "dev": "nodemon --exec tsx ./src/server.ts",
+    "dev:tsx": "tsx ./src/server.ts",
+    "test": "tsx ./src/server.ts",
+    "test:phase4": "tsx ./test-phase4.ts"
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "name": "Crypto News Aggregator",
+  "description": "Fetch crypto news from premium APIs with automatic payment",
+  "version": "1.0.0",
+  "nodes": [
+    {
+      "id": "trigger-1",
+      "type": "trigger",
+      "label": "Start: Fetch Crypto News",
+      "position": { "x": 100, "y": 100 }
+    },
+    {
+      "id": "news-crypto",
+      "type": "nexusPay",
+      "label": "Get Crypto News (0.1 token)",
+      "config": {
+        "url": "http://localhost:4000/api/news/crypto",
+        "method": "GET"
+      },
+      "position": { "x": 300, "y": 100 }
+    },
+    {
+      "id": "news-defi",
+      "type": "nexusPay",
+      "label": "Get DeFi News (0.1 token)",
+      "config": {
+        "url": "http://localhost:4000/api/news/defi",
+        "method": "GET"
+      },
+      "position": { "x": 500, "y": 100 }
+    },
+    {
+      "id": "output-1",
+      "type": "output",
+      "label": "Display News Feed",
+      "position": { "x": 700, "y": 100 }
+    }
+  ],
+  "edges": [
+    { "from": "trigger-1", "to": "news-crypto" },
+    { "from": "news-crypto", "to": "news-defi" },
+    { "from": "news-defi", "to": "output-1" }
+  ],
+  "globalContext": {
+    "userPrivateKey": "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
+    "chainId": 240,
+    "rpcUrl": "https://testnet.zkevm.cronos.org",
+    "maxPrice": "10.0"
+  }
+}

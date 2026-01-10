@@ -1,0 +1,15 @@
+{
+  "cronosZkEvmTestnet": {
+    "network": "cronosZkEvmTestnet",
+    "chainId": 240,
+    "treasury": "0x86c83A39EcD5f4F4345bc61Eec6eC790C895c4A7",
+    "registry": "0xe821fAbc3d23790596669043b583e931d8fC2710",
+    "sessionKeyManager": "0x59BD809Fc780195B80877Bc3Cf34d5608b2752E2",
+    "deployedAt": "2025-12-19T10:45:48.544Z",
+    "chimeraDelegate": "0x78E566E5B7b10c8c93d622382d6a27d960A3D76A"
+  },
+  "hardhat": {
+    "chimeraDelegate": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+    "deployedAt": "2025-12-19T10:36:09.146Z"
+  }
+}

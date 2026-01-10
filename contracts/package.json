@@ -1,0 +1,30 @@
+{
+  "name": "nexus-contracts",
+  "version": "1.0.0",
+  "description": "Nexus Ecosystem Smart Contracts",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "deploy:cronos": "hardhat run scripts/deploy.js --network cronosZkEvmTestnet",
+    "deploy:base": "hardhat run scripts/deploy.js --network baseSepolia",
+    "deploy:polygon": "hardhat run scripts/deploy.js --network polygonAmoy",
+    "deploy:sepolia": "hardhat run scripts/deploy.js --network sepolia",
+    "deploy:all": "node scripts/deploy-multichain.js",
+    "verify": "hardhat verify"
+  },
+  "devDependencies": {
+    "@matterlabs/hardhat-zksync": "^1.6.2",
+    "@matterlabs/hardhat-zksync-deploy": "^1.8.0",
+    "@matterlabs/hardhat-zksync-solc": "^1.5.1",
+    "@matterlabs/hardhat-zksync-verify": "^1.9.1",
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "@nomicfoundation/hardhat-verify": "^2.0.0",
+    "@openzeppelin/contracts": "^5.0.0",
+    "dotenv": "^16.3.1",
+    "hardhat": "^2.19.0"
+  },
+  "dependencies": {
+    "ethers": "^6.16.0",
+    "zksync-ethers": "^6.21.0"
+  }
+}

@@ -1,0 +1,118 @@
+{
+  "name": "DeFi Yield Optimizer Demo",
+  "description": "APY Monitor → Yield Optimizer Agent → Auto-rebalance for maximum yield",
+  "type": "repeat",
+  "category": "defi-yield",
+  "nodes": {
+    "apy-1": {
+      "position": { "x": 100, "y": 200 },
+      "label": "APY Monitor",
+      "type": "apyMonitor",
+      "node_data": {
+        "protocols": ["aave-v3", "compound-v3", "curve-3pool", "yearn-usdc", "morpho-aave"],
+        "asset": "USDC",
+        "minAPY": 2,
+        "useRealAPI": true,
+        "chain": "Ethereum"
+      },
+      "inputs": { "activate": { "type": "bool" } },
+      "outputs": { "apyData": { "type": "array" }, "bestProtocol": { "type": "string" }, "bestAPY": { "type": "float" }, "shouldRebalance": { "type": "bool" } }
+    },
+    "yield-1": {
+      "position": { "x": 450, "y": 200 },
+      "label": "Yield Optimizer Agent",
+      "type": "yieldOptimizer",
+      "node_data": {
+        "currentProtocol": "aave-v3",
+        "depositAmount": "5000",
+        "minProfitThreshold": 0.5,
+        "gasPrice": "25",
+        "projectionMonths": 12
+      },
+      "inputs": { "apyData": { "type": "array" }, "bestAPY": { "type": "float" } },
+      "outputs": { "action": { "type": "string" }, "shouldRebalance": { "type": "bool" }, "fromProtocol": { "type": "string" }, "toProtocol": { "type": "string" }, "netProfit": { "type": "string" }, "reasoning": { "type": "array" } }
+    },
+    "condition-1": {
+      "position": { "x": 800, "y": 200 },
+      "label": "Should Rebalance?",
+      "type": "condition",
+      "node_data": {
+        "condition": "shouldRebalance == true",
+        "leftVariable": "shouldRebalance",
+        "operator": "==",
+        "rightValue": true
+      },
+      "inputs": { "shouldRebalance": { "type": "bool" } },
+      "outputs": { "true-path": { "type": "bool" }, "false-path": { "type": "bool" } }
+    },
+    "maxinv-1": {
+      "position": { "x": 1100, "y": 100 },
+      "label": "Max Investment Check",
+      "type": "maxInvestment",
+      "node_data": {
+        "maxAmountPerTrade": "2500",
+        "maxTotalExposure": "5000",
+        "currency": "USDC",
+        "enforceLimit": true
+      },
+      "inputs": { "activate": { "type": "bool" } },
+      "outputs": { "approved": { "type": "bool" }, "adjustedAmount": { "type": "string" } }
+    },
+    "confirm-1": {
+      "position": { "x": 1100, "y": 300 },
+      "label": "User Confirmation",
+      "type": "userConfirmation",
+      "node_data": {
+        "requireConfirmation": true,
+        "confirmationMethod": "popup",
+        "timeoutSeconds": 120,
+        "showDetails": true,
+        "minConfirmationDelay": 5
+      },
+      "inputs": { "trade": { "type": "object" } },
+      "outputs": { "confirmed": { "type": "bool" } }
+    },
+    "print-hold": {
+      "position": { "x": 1100, "y": 450 },
+      "label": "Log: Holding Position",
+      "type": "print",
+      "node_data": {
+        "message": "Yield Optimizer: HOLD - Current position is optimal"
+      },
+      "inputs": { "test": { "type": "float" } },
+      "outputs": {}
+    },
+    "swap-1": {
+      "position": { "x": 1400, "y": 200 },
+      "label": "Execute Rebalance",
+      "type": "swap",
+      "node_data": {
+        "tokenIn": "0xUSDC",
+        "tokenOut": "0xUSDC",
+        "amountIn": "0",
+        "amountOutMin": "0",
+        "note": "Withdraw from old protocol, deposit to new"
+      },
+      "inputs": { "activate": { "type": "bool" } },
+      "outputs": { "txHash": { "type": "string" } }
+    }
+  },
+  "edges": {
+    "apy-1": {
+      "yield-1": { "apyData": "apyData", "bestAPY": "bestAPY" }
+    },
+    "yield-1": {
+      "condition-1": { "shouldRebalance": "shouldRebalance" }
+    },
+    "condition-1": {
+      "maxinv-1": { "true-path": "activate" },
+      "print-hold": { "false-path": "test" }
+    },
+    "maxinv-1": {
+      "confirm-1": { "approved": "trade" }
+    },
+    "confirm-1": {
+      "swap-1": { "confirmed": "activate" }
+    }
+  }
+}

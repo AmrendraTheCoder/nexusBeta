@@ -1,0 +1,63 @@
+# Render Blueprint - NexusFlow Deployment
+# Deploy: Render Dashboard → New → Blueprint → Connect Repo
+# https://render.com/docs/blueprint-spec
+
+services:
+  # ============ Backend API Server ============
+  - type: web
+    name: nexusflow-backend
+    runtime: node
+    region: oregon
+    plan: free
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/nexus/supported-chains
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 8080
+      - key: VIRTUAL_MODE
+        value: "true"
+      - key: ENABLE_REGISTRY_UPDATES
+        value: "false"
+      - key: MONGO_URI
+        sync: false
+      - key: MASTER_WALLET_PRIVATE_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+
+  # ============ Workflow Engine ============
+  - type: web
+    name: nexusflow-engine
+    runtime: node
+    region: oregon
+    plan: free
+    buildCommand: cd sdk/nip1-sdk && npm install && npm run build && cd ../../engine && npm install && npm run build
+    startCommand: npm start --prefix engine
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 8080
+      - key: DEMO_MODE
+        value: "true"
+      - key: VIRTUAL_MODE
+        value: "true"
+      - key: RPC_URL
+        value: https://testnet.zkevm.cronos.org
+      - key: CHAIN_ID
+        value: "240"
+      - key: PRIVATE_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: DELEGATE_CONTRACT_ADDRESS
+        value: "0x78E566E5B7b10c8c93d622382d6a27d960A3D76A"

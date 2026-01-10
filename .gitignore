@@ -1,0 +1,114 @@
+# Dependencies
+node_modules/
+.pnp/
+.pnp.js
+
+# Build outputs
+dist/
+build/
+out/
+.next/
+.nuxt/
+.output/
+*.tsbuildinfo
+
+# Caches
+.cache/
+.parcel-cache/
+.turbo/
+.vercel/
+.netlify/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# IDE and Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*.swn
+*~
+.project
+.classpath
+.settings/
+*.sublime-workspace
+*.sublime-project
+
+# Testing
+coverage/
+.nyc_output/
+*.lcov
+
+# Solidity / Smart Contracts
+artifacts/
+cache/
+typechain/
+typechain-types/
+deployments/localhost/
+.openzeppelin/
+
+# Hardhat
+hardhat.config.ts.timestamp*
+
+# Foundry
+out/
+broadcast/
+
+# Package manager locks (keep one, ignore others if needed)
+# Uncomment if you want to ignore lock files
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Debug
+.debug/
+
+# Secrets and keys (IMPORTANT!)
+*.pem
+*.key
+*.p12
+*.pfx
+secrets/
+.secrets/
+private-keys/
+
+# Environment files (keep .example files)
+.env
+.env.local
+.env.*.local
+!.env.example
+!.env.production
+
+# Local database files
+*.sqlite
+*.sqlite3
+*.db
+
+# Misc
+*.bak
+*.backup
+*.orig
+.history/

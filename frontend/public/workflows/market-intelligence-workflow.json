@@ -1,0 +1,62 @@
+{
+  "name": "Market Intelligence Dashboard",
+  "description": "Comprehensive market data with analytics and predictions",
+  "version": "1.0.0",
+  "nodes": [
+    {
+      "id": "trigger-1",
+      "type": "trigger",
+      "label": "Start: Build Dashboard",
+      "position": { "x": 50, "y": 200 }
+    },
+    {
+      "id": "market-prices",
+      "type": "nexusPay",
+      "label": "Live Market Prices (0.1 token)",
+      "config": {
+        "url": "http://localhost:4000/api/market/prices",
+        "method": "GET"
+      },
+      "position": { "x": 250, "y": 100 }
+    },
+    {
+      "id": "analytics-sentiment",
+      "type": "nexusPay",
+      "label": "Market Sentiment (0.15 token)",
+      "config": {
+        "url": "http://localhost:4000/api/analytics/sentiment",
+        "method": "GET"
+      },
+      "position": { "x": 250, "y": 250 }
+    },
+    {
+      "id": "predictions-trends",
+      "type": "nexusPay",
+      "label": "Price Predictions (0.2 token)",
+      "config": {
+        "url": "http://localhost:4000/api/predictions/trends",
+        "method": "GET"
+      },
+      "position": { "x": 450, "y": 175 }
+    },
+    {
+      "id": "output-1",
+      "type": "output",
+      "label": "Market Dashboard",
+      "position": { "x": 650, "y": 200 }
+    }
+  ],
+  "edges": [
+    { "from": "trigger-1", "to": "market-prices" },
+    { "from": "trigger-1", "to": "analytics-sentiment" },
+    { "from": "market-prices", "to": "predictions-trends" },
+    { "from": "analytics-sentiment", "to": "predictions-trends" },
+    { "from": "predictions-trends", "to": "output-1" }
+  ],
+  "globalContext": {
+    "userPrivateKey": "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
+    "chainId": 240,
+    "rpcUrl": "https://testnet.zkevm.cronos.org",
+    "maxPrice": "20.0"
+  }
+}

@@ -1,0 +1,272 @@
+{
+  "name": "24/7 Automated AI Trading Bot",
+  "description": "Continuous monitoring and automated trading based on AI predictions",
+  "type": "repeat",
+  "repeatInterval": 300000,
+  "version": "1.0.0",
+  "nodes": [
+    {
+      "id": "agent-price",
+      "type": "custom",
+      "position": { "x": 100, "y": 200 },
+      "data": {
+        "type": "pyth-network",
+        "label": "Real-Time Price Feed",
+        "inputs": {},
+        "outputs": { "price": { "type": "float" }, "currentPrice": { "type": "float" } },
+        "node_data": {
+          "type": "pyth-network",
+          "id": "agent-price",
+          "priceFeedId": "0xe62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43",
+          "pythUpdateContractAddress": "0xDd24F84d36BF92C65F92307595335bdFab5Bbd21"
+        }
+      }
+    },
+    {
+      "id": "agent-vision",
+      "type": "custom",
+      "position": { "x": 350, "y": 100 },
+      "data": {
+        "type": "visionAnalysis",
+        "label": "AI Vision Analysis",
+        "inputs": { "price": { "type": "float" } },
+        "outputs": { "analysis": { "type": "string" }, "sentiment": { "type": "string" }, "action": { "type": "string" } },
+        "node_data": {
+          "type": "visionAnalysis",
+          "id": "agent-vision",
+          "prompt": "Analyze BTC chart patterns and provide trading signal for automated execution",
+          "persona": "aggressive",
+          "analysisType": "chart",
+          "apiProvider": "gemini"
+        }
+      }
+    },
+    {
+      "id": "agent-news",
+      "type": "custom",
+      "position": { "x": 350, "y": 300 },
+      "data": {
+        "type": "newsPrediction",
+        "label": "News Sentiment",
+        "inputs": { "price": { "type": "float" } },
+        "outputs": { "sentiment": { "type": "string" }, "signal": { "type": "string" } },
+        "node_data": {
+          "type": "newsPrediction",
+          "id": "agent-news",
+          "symbol": "BTC",
+          "newsSource": "aggregated",
+          "lookbackHours": 24,
+          "includePatternAnalysis": true
+        }
+      }
+    },
+    {
+      "id": "agent-trader",
+      "type": "custom",
+      "position": { "x": 600, "y": 200 },
+      "data": {
+        "type": "tradingAgent",
+        "label": "AI Trading Agent",
+        "inputs": { "analysis": { "type": "string" }, "sentiment": { "type": "string" }, "price": { "type": "float" } },
+        "outputs": { "signal": { "type": "object" }, "action": { "type": "string" }, "shouldTrade": { "type": "bool" } },
+        "node_data": {
+          "type": "tradingAgent",
+          "id": "agent-trader",
+          "symbol": "BTC",
+          "strategy": "ai-signal",
+          "riskLevel": "moderate",
+          "maxPositionSize": "0.1",
+          "stopLossPercent": 5,
+          "takeProfitPercent": 10
+        }
+      }
+    },
+    {
+      "id": "agent-risk",
+      "type": "custom",
+      "position": { "x": 850, "y": 100 },
+      "data": {
+        "type": "riskManager",
+        "label": "Risk Manager",
+        "inputs": { "signal": { "type": "object" }, "shouldTrade": { "type": "bool" } },
+        "outputs": { "approved": { "type": "bool" }, "reason": { "type": "string" } },
+        "node_data": {
+          "type": "riskManager",
+          "id": "agent-risk",
+          "maxPortfolioRisk": 30,
+          "maxSinglePositionSize": 10,
+          "maxDailyLoss": 5,
+          "maxOpenPositions": 3
+        }
+      }
+    },
+    {
+      "id": "agent-limit",
+      "type": "custom",
+      "position": { "x": 850, "y": 300 },
+      "data": {
+        "type": "maxInvestment",
+        "label": "Investment Limiter",
+        "inputs": { "signal": { "type": "object" }, "shouldTrade": { "type": "bool" } },
+        "outputs": { "approved": { "type": "bool" }, "adjustedAmount": { "type": "string" } },
+        "node_data": {
+          "type": "maxInvestment",
+          "id": "agent-limit",
+          "maxAmountPerTrade": "0.05",
+          "maxTotalExposure": "0.2",
+          "currency": "ETH",
+          "enforceLimit": true
+        }
+      }
+    },
+    {
+      "id": "condition-trade",
+      "type": "custom",
+      "position": { "x": 1100, "y": 200 },
+      "data": {
+        "type": "condition",
+        "label": "Trade Decision Gate",
+        "inputs": { "shouldTrade": { "type": "bool" }, "approved": { "type": "bool" } },
+        "outputs": { "path": { "type": "string" } },
+        "node_data": {
+          "type": "condition",
+          "id": "condition-trade",
+          "leftVariable": "shouldTrade",
+          "operator": "equals",
+          "rightValue": "true"
+        }
+      }
+    },
+    {
+      "id": "swap-buy",
+      "type": "custom",
+      "position": { "x": 1350, "y": 100 },
+      "data": {
+        "type": "swap",
+        "label": "Execute Buy Order",
+        "inputs": { "activate": { "type": "bool" } },
+        "outputs": { "txHash": { "type": "string" }, "success": { "type": "bool" } },
+        "node_data": {
+          "type": "swap",
+          "id": "swap-buy",
+          "dex": "1inch",
+          "fromToken": "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+          "toToken": "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
+          "amount": "0.01",
+          "slippage": "1"
+        }
+      }
+    },
+    {
+      "id": "log-success",
+      "type": "custom",
+      "position": { "x": 1600, "y": 100 },
+      "data": {
+        "type": "print",
+        "label": "Log Trade Success",
+        "inputs": { "activate": { "type": "bool" } },
+        "outputs": {},
+        "node_data": {
+          "type": "print",
+          "id": "log-success",
+          "message": "✅ Trade executed successfully!"
+        }
+      }
+    },
+    {
+      "id": "log-skip",
+      "type": "custom",
+      "position": { "x": 1350, "y": 300 },
+      "data": {
+        "type": "print",
+        "label": "Log No Trade",
+        "inputs": { "activate": { "type": "bool" } },
+        "outputs": {},
+        "node_data": {
+          "type": "print",
+          "id": "log-skip",
+          "message": "⏭️ No trade signal - continuing monitoring"
+        }
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "source": "agent-price",
+      "target": "agent-vision",
+      "sourceHandle": null,
+      "targetHandle": null
+    },
+    {
+      "id": "e2",
+      "source": "agent-price",
+      "target": "agent-news",
+      "sourceHandle": null,
+      "targetHandle": null
+    },
+    {
+      "id": "e3",
+      "source": "agent-vision",
+      "target": "agent-trader",
+      "sourceHandle": null,
+      "targetHandle": null
+    },
+    {
+      "id": "e4",
+      "source": "agent-news",
+      "target": "agent-trader",
+      "sourceHandle": null,
+      "targetHandle": null
+    },
+    {
+      "id": "e5",
+      "source": "agent-trader",
+      "target": "agent-risk",
+      "sourceHandle": null,
+      "targetHandle": null
+    },
+    {
+      "id": "e6",
+      "source": "agent-trader",
+      "target": "agent-limit",
+      "sourceHandle": null,
+      "targetHandle": null
+    },
+    {
+      "id": "e7",
+      "source": "agent-risk",
+      "target": "condition-trade",
+      "sourceHandle": null,
+      "targetHandle": null
+    },
+    {
+      "id": "e8",
+      "source": "agent-limit",
+      "target": "condition-trade",
+      "sourceHandle": null,
+      "targetHandle": null
+    },
+    {
+      "id": "e9",
+      "source": "condition-trade",
+      "target": "swap-buy",
+      "sourceHandle": "true",
+      "targetHandle": null
+    },
+    {
+      "id": "e10",
+      "source": "swap-buy",
+      "target": "log-success",
+      "sourceHandle": null,
+      "targetHandle": null
+    },
+    {
+      "id": "e11",
+      "source": "condition-trade",
+      "target": "log-skip",
+      "sourceHandle": "false",
+      "targetHandle": null
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+# Ignore everything by default
+*
+
+# Allow source files
+!src/
+!src/**/*.ts
+
+# Allow config files
+!package.json
+!tsconfig.json
+!README.md
+!LICENSE
+!CHANGELOG.md
+
+# Allow built files
+!dist/
+!dist/**/*.js
+!dist/**/*.d.ts
+!dist/**/*.map
