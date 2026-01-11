@@ -3,7 +3,7 @@ import { fetchWithPayment } from "../services/x402Client";
 import { useX402Session } from "./useX402Session";
 
 // Default to localhost if env variable not set
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
+const API_URL = import.meta.env.VITE_ENGINE_URL || import.meta.env.VITE_API_URL || "http://localhost:8080";
 
 export const useWorkflowExecution = () => {
   const { ensureBalance, isInitialized } = useX402Session();
@@ -419,7 +419,7 @@ function getSimulatedResult(nodeType, label) {
 
 // Poll for workflow logs
 const pollWorkflowLogs = async (walletaddr) => {
-  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
+  const API_URL = import.meta.env.VITE_ENGINE_URL || import.meta.env.VITE_API_URL || "http://localhost:8080";
   const maxAttempts = 60;
   let attempts = 0;
   

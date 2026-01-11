@@ -16,8 +16,8 @@ export default function AutomatedTradingManager({ workflowData, onClose, walletA
   });
 
   const startAutomatedTrading = async () => {
-    const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
-    
+    const API_URL = import.meta.env.VITE_ENGINE_URL || import.meta.env.VITE_API_URL || "http://localhost:8080";
+
     try {
       const response = await fetch(`${API_URL}/workflow`, {
         method: "POST",
@@ -45,8 +45,8 @@ export default function AutomatedTradingManager({ workflowData, onClose, walletA
   };
 
   const stopAutomatedTrading = async () => {
-    const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
-    
+    const API_URL = import.meta.env.VITE_ENGINE_URL || import.meta.env.VITE_API_URL || "http://localhost:8080";
+
     try {
       const response = await fetch(`${API_URL}/workflow/stop`, {
         method: "POST",
@@ -64,17 +64,17 @@ export default function AutomatedTradingManager({ workflowData, onClose, walletA
   };
 
   const startLogPolling = () => {
-    const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
-    
+    const API_URL = import.meta.env.VITE_ENGINE_URL || import.meta.env.VITE_API_URL || "http://localhost:8080";
+
     const pollInterval = setInterval(async () => {
       try {
         const response = await fetch(`${API_URL}/logs/${walletAddress}`);
         const data = await response.json();
-        
+
         if (data.logs && data.logs.length > 0) {
           // Update logs
           setLogs(data.logs.slice(-50)); // Keep last 50 logs
-          
+
           // Update stats
           setStats(prev => ({
             ...prev,
@@ -113,7 +113,7 @@ export default function AutomatedTradingManager({ workflowData, onClose, walletA
                 <p className="text-violet-100">Continuous market monitoring & automated execution</p>
               </div>
             </div>
-            <button 
+            <button
               onClick={onClose}
               className="bg-white/20 hover:bg-white/30 text-white rounded-lg px-4 py-2 transition-colors"
             >
@@ -130,13 +130,13 @@ export default function AutomatedTradingManager({ workflowData, onClose, walletA
               <Settings size={20} className="text-violet-600" />
               Control Panel
             </h3>
-            
+
             <div className="grid grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
                   Monitoring Interval
                 </label>
-                <select 
+                <select
                   value={interval}
                   onChange={(e) => setInterval(Number(e.target.value))}
                   disabled={isRunning}
@@ -188,7 +188,7 @@ export default function AutomatedTradingManager({ workflowData, onClose, walletA
                   Stop Bot
                 </button>
               )}
-              
+
               <div className="text-sm text-slate-600">
                 <Clock size={16} className="inline mr-1" />
                 Checks market every <strong>{interval / 60} minutes</strong>
@@ -217,11 +217,10 @@ export default function AutomatedTradingManager({ workflowData, onClose, walletA
                 logs.map((log, i) => (
                   <div key={i} className="flex items-start gap-3 text-sm border-b border-slate-700 pb-2">
                     <span className="text-slate-500 text-xs">{new Date(log.timestamp).toLocaleTimeString()}</span>
-                    <span className={`px-2 py-0.5 rounded text-xs font-bold ${
-                      log.type === 'success' ? 'bg-green-500/20 text-green-400' :
-                      log.type === 'error' ? 'bg-red-500/20 text-red-400' :
-                      'bg-blue-500/20 text-blue-400'
-                    }`}>
+                    <span className={`px-2 py-0.5 rounded text-xs font-bold ${log.type === 'success' ? 'bg-green-500/20 text-green-400' :
+                        log.type === 'error' ? 'bg-red-500/20 text-red-400' :
+                          'bg-blue-500/20 text-blue-400'
+                      }`}>
                       {log.type.toUpperCase()}
                     </span>
                     <span className="text-slate-300 flex-1">{log.message}</span>
@@ -237,7 +236,7 @@ export default function AutomatedTradingManager({ workflowData, onClose, walletA
             <div>
               <h4 className="font-bold text-amber-900 mb-1">Important Notice</h4>
               <p className="text-amber-800 text-sm leading-relaxed">
-                This bot will automatically execute trades based on AI predictions. Ensure you have sufficient funds and understand the risks involved. 
+                This bot will automatically execute trades based on AI predictions. Ensure you have sufficient funds and understand the risks involved.
                 The bot will continuously monitor markets at the specified interval and execute trades when conditions are met. Monitor regularly and stop if needed.
               </p>
             </div>

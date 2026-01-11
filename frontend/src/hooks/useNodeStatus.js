@@ -14,7 +14,7 @@ export function useNodeStatus(walletAddress) {
     if (!walletAddress || !isStatusPollingEnabled) return;
 
     try {
-      const engineUrl = import.meta.env.VITE_API_URL || "http://localhost:8080";
+      const engineUrl = import.meta.env.VITE_ENGINE_URL || import.meta.env.VITE_API_URL || "http://localhost:8080";
       const statusUrl = `${engineUrl}/status?wallet=${walletAddress}`;
       
       // Suppress 404 errors from appearing in console by using silent fetch
