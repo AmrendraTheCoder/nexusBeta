@@ -16,14 +16,32 @@ dotenv.config();
 const app = express();
 const user_workflows: Record<string, Workflow> = {};
 
+// CORS configuration for production
+const corsOptions = {
+  origin: [
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'http://127.0.0.1:5173',
+    'https://nexusflow.vercel.app',
+    'https://nexusflowbeta.vercel.app',
+    'https://nexusflow-frontend.vercel.app',
+    // Allow any vercel.app subdomain for preview deployments
+    /\.vercel\.app$/,
+    // Allow all origins in development
+    ...(process.env.NODE_ENV !== 'production' ? ['*'] : [])
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  credentials: true,
+  optionsSuccessStatus: 200, // Some legacy browsers choke on 204
+  preflightContinue: false
+};
+
 // Enable CORS for all routes
-app.use(
-  cors({
-    origin: "*", // Allow both frontend and any local development
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
+app.use(cors(corsOptions));
+
+// Handle preflight OPTIONS requests explicitly
+app.options('*', cors(corsOptions));
 
 app.use(express.json());
 

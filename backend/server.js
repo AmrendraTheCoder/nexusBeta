@@ -88,7 +88,30 @@ function initializeWallets() {
   }
 }
 
-app.use(cors());
+// CORS configuration for production
+const corsOptions = {
+  origin: [
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'http://127.0.0.1:5173',
+    'https://nexusflow.vercel.app',
+    'https://nexusflowbeta.vercel.app',
+    'https://nexusflow-frontend.vercel.app',
+    // Allow any vercel.app subdomain for previews
+    /\.vercel\.app$/
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  credentials: true,
+  optionsSuccessStatus: 200, // Some legacy browsers choke on 204
+  preflightContinue: false
+};
+
+app.use(cors(corsOptions));
+
+// Handle preflight OPTIONS requests explicitly
+app.options('*', cors(corsOptions));
+
 app.use(bodyParser.json());
 
 // In-memory fallback database for when MongoDB is unavailable
