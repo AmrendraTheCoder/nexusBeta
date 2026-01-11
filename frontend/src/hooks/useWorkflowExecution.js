@@ -294,7 +294,7 @@ export const useWorkflowExecution = () => {
         window.dispatchEvent(new CustomEvent('showToast', {
           detail: {
             type: 'success',
-            title: '🚀 Workflow Started!',
+            title: 'Workflow Started!',
             message: 'AI agents are analyzing markets. Check the Execution Logs panel for real-time updates.'
           }
         }));
