@@ -69,7 +69,8 @@ app.get("/status", (req, res) => {
     const currentStatus = user_workflows[walletaddr].status;
     res.status(200).json({ currentNode: currentStatus });
   } else {
-    res.status(404).json({ currentNode: null });
+    // Return 200 with null to avoid console 404 errors - this is expected behavior
+    res.status(200).json({ currentNode: null });
   }
 });
 
