@@ -290,7 +290,14 @@ export const useWorkflowExecution = () => {
         // Start polling for logs
         pollWorkflowLogs(workflowData.walletaddr);
         
-        alert(`✅ Workflow execution started!\n\nCheck the "Execution Logs" panel for real-time updates.`);
+        // Dispatch custom toast event instead of browser alert
+        window.dispatchEvent(new CustomEvent('showToast', {
+          detail: {
+            type: 'success',
+            title: '🚀 Workflow Started!',
+            message: 'AI agents are analyzing markets. Check the Execution Logs panel for real-time updates.'
+          }
+        }));
         return result;
       } catch (error) {
         console.error("Error executing workflow:", error);
@@ -301,7 +308,14 @@ export const useWorkflowExecution = () => {
           simulateWorkflowExecution(nodes, workflowData.walletaddr);
           return { success: true, simulated: true };
         } else {
-          alert(`❌ Error executing workflow:\n\n${error.message}`);
+          // Dispatch error toast instead of browser alert
+          window.dispatchEvent(new CustomEvent('showToast', {
+            detail: {
+              type: 'error',
+              title: '❌ Workflow Error',
+              message: error.message
+            }
+          }));
         }
         throw error;
       }

@@ -137,6 +137,29 @@ export default function App() {
   const { currentExecutingNode, workflowCompleted } = useNodeStatus(address);
   const { logs, isExecuting, addLog, clearLogs, startExecution, endExecution } = useExecutionLogs();
 
+  // Global Toast Notification State
+  const [toasts, setToasts] = useState([]);
+
+  // Add toast helper
+  const addToast = useCallback((type, title, message) => {
+    const id = Date.now();
+    setToasts(prev => [...prev.slice(-4), { id, type, title, message }]);
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+      setToasts(prev => prev.filter(t => t.id !== id));
+    }, 5000);
+  }, []);
+
+  // Listen for global toast events
+  useEffect(() => {
+    const handleShowToast = (event) => {
+      const { type, title, message } = event.detail;
+      addToast(type, title, message);
+    };
+    window.addEventListener('showToast', handleShowToast);
+    return () => window.removeEventListener('showToast', handleShowToast);
+  }, [addToast]);
+
   // Trigger confetti when workflow completes
   useEffect(() => {
     const handleWorkflowComplete = (event) => {
@@ -1006,10 +1029,16 @@ export default function App() {
           }
         }, 100);
 
-        alert("✅ Workflow imported successfully!");
+        // Dispatch success toast
+        window.dispatchEvent(new CustomEvent('showToast', {
+          detail: { type: 'success', title: '✅ Import Successful', message: 'Workflow imported and ready to execute!' }
+        }));
       } catch (error) {
         console.error("Error importing workflow:", error);
-        alert(`❌ Failed to import workflow: ${error.message}`);
+        // Dispatch error toast
+        window.dispatchEvent(new CustomEvent('showToast', {
+          detail: { type: 'error', title: '❌ Import Failed', message: error.message }
+        }));
       }
     };
     reader.readAsText(file);
@@ -1573,6 +1602,39 @@ export default function App() {
             }}
           />
         )}
+
+        {/* Global Toast Notifications */}
+        <div className="fixed top-4 right-4 z-[9999] space-y-3 pointer-events-none">
+          {toasts.map(toast => (
+            <div
+              key={toast.id}
+              className={`pointer-events-auto animate-slide-in-right backdrop-blur-lg border rounded-2xl p-4 shadow-2xl max-w-sm transform transition-all duration-300 ${toast.type === 'success'
+                  ? 'bg-gradient-to-r from-emerald-500/90 to-green-500/90 border-emerald-400/50 text-white'
+                  : toast.type === 'error'
+                    ? 'bg-gradient-to-r from-red-500/90 to-rose-500/90 border-red-400/50 text-white'
+                    : toast.type === 'warning'
+                      ? 'bg-gradient-to-r from-amber-500/90 to-orange-500/90 border-amber-400/50 text-white'
+                      : 'bg-gradient-to-r from-blue-500/90 to-indigo-500/90 border-blue-400/50 text-white'
+                }`}
+            >
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 text-2xl">
+                  {toast.type === 'success' ? '🚀' : toast.type === 'error' ? '⚠️' : toast.type === 'warning' ? '⚡' : '💡'}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-bold text-sm">{toast.title}</h4>
+                  <p className="text-xs opacity-90 mt-0.5 leading-relaxed">{toast.message}</p>
+                </div>
+                <button
+                  onClick={() => setToasts(prev => prev.filter(t => t.id !== toast.id))}
+                  className="flex-shrink-0 opacity-70 hover:opacity-100 transition-opacity"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
 
       </div >
     </ReactFlowProvider >
