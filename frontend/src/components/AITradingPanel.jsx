@@ -27,8 +27,12 @@ export default function AITradingPanel({ isOpen, onClose, onAddNode, onLoadTempl
     const handleGenerateStrategy = async () => {
         if (!aiPrompt.trim() || isGenerating) return;
         setIsGenerating(true);
+
+        // Use environment variable or fallback to localhost
+        const backendUrl = import.meta.env.VITE_NEXUS_BACKEND_URL || "http://localhost:3001";
+
         try {
-            const response = await fetch("http://localhost:3001/api/ai/generate-workflow", {
+            const response = await fetch(`${backendUrl}/api/ai/generate-workflow`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ prompt: aiPrompt, mode: "trading" }),

@@ -141,14 +141,14 @@ export default function App() {
   useEffect(() => {
     const handleWorkflowComplete = (event) => {
       console.log("🎉 Workflow completed event received! showing result page...");
-      
+
       // Store workflow result data
       if (event?.detail) {
         setWorkflowResultData(event.detail);
       } else if (logs && logs.length > 0) {
         setWorkflowResultData(logs[logs.length - 1]);
       }
-      
+
       setIsResultModalOpen(true);
 
       // Create a spectacular confetti effect
@@ -1069,11 +1069,11 @@ export default function App() {
     try {
       const response = await fetch('/workflows/demo-showcase.json');
       const workflowData = await response.json();
-      
+
       // Load the workflow using existing loadWorkflow function
-      loadWorkflow({ 
-        workflowName: workflowData.name, 
-        workflowData: workflowData 
+      loadWorkflow({
+        workflowName: workflowData.name,
+        workflowData: workflowData
       });
 
       // Set to repeat mode for continuous execution
@@ -1441,17 +1441,19 @@ export default function App() {
         <AIAgentPanel
           isOpen={isAIPanelOpen}
           onClose={() => setIsAIPanelOpen(false)}
-          onAddNodes={(newNodes) => {
+          onAddNodes={(newNodes, newEdges) => {
             setNodes((nds) => [...nds, ...newNodes]);
-            // Auto-connect nodes if multiple
-            if (newNodes.length > 1) {
-              const newEdges = newNodes.slice(0, -1).map((node, i) => ({
+            // Use provided edges if available, otherwise auto-connect sequentially
+            if (newEdges && newEdges.length > 0) {
+              setEdges((eds) => [...eds, ...newEdges]);
+            } else if (newNodes.length > 1) {
+              const autoEdges = newNodes.slice(0, -1).map((node, i) => ({
                 id: `ai-edge-${Date.now()}-${i}`,
                 source: node.id,
                 target: newNodes[i + 1].id,
                 type: "default",
               }));
-              setEdges((eds) => [...eds, ...newEdges]);
+              setEdges((eds) => [...eds, ...autoEdges]);
             }
           }}
         />

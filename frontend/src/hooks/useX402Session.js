@@ -13,6 +13,10 @@ const DEFAULT_AUTH_AMOUNT = 1.0; // $1.00 default authorization
 /**
  * Hook for managing x402 payment sessions
  * Handles session balance authorization and payment for workflow execution
+ * 
+ * NOTE: This hook no longer prompts for private key automatically.
+ * The private key should be set via environment variable VITE_EVM_PRIVATE_KEY
+ * or the user can manually initialize via the Settings panel.
  */
 export function useX402Session() {
   const { address, isConnected } = useAccount();
@@ -22,8 +26,7 @@ export function useX402Session() {
   const [isLoadingBalance, setIsLoadingBalance] = useState(false);
   const [error, setError] = useState(null);
 
-  // Get private key from environment or prompt user
-  // Note: In production, this should be handled more securely
+  // Get private key from environment or localStorage (NO PROMPT)
   const getPrivateKey = useCallback(() => {
     // Try environment variable first
     const envKey = import.meta.env.VITE_EVM_PRIVATE_KEY;
@@ -31,37 +34,63 @@ export function useX402Session() {
       return envKey;
     }
 
-    // Try to get from localStorage (user might have stored it)
+    // Try to get from localStorage (user might have stored it via Settings)
     const storedKey = localStorage.getItem("x402_private_key");
     if (storedKey) {
       return storedKey;
     }
 
-    // Prompt user for private key (for x402 payments)
-    // In production, you might want to use a more secure method
-    const userKey = prompt(
-      "Enter your private key for x402 payments (Base Sepolia):\n" +
-      "This will be stored locally and used for workflow execution payments."
-    );
-
-    if (userKey) {
-      localStorage.setItem("x402_private_key", userKey);
-      return userKey;
-    }
-
+    // Don't prompt - return null and let the caller handle it
     return null;
   }, []);
 
-  // Initialize x402 client
-  const initializeClient = useCallback(async () => {
+  // Check if private key is available (without prompting)
+  const hasPrivateKey = useCallback(() => {
+    return !!getPrivateKey();
+  }, [getPrivateKey]);
+
+  // Set private key manually (from Settings panel)
+  const setPrivateKey = useCallback((key) => {
+    if (key) {
+      localStorage.setItem("x402_private_key", key);
+      return true;
+    }
+    return false;
+  }, []);
+
+  // Clear stored private key
+  const clearPrivateKey = useCallback(() => {
+    localStorage.removeItem("x402_private_key");
+    setIsInitialized(false);
+  }, []);
+
+  // Initialize x402 client (only if private key is available)
+  const initializeClient = useCallback(async (forcePrompt = false) => {
     if (isInitialized) {
       return true;
     }
 
     try {
-      const privateKey = getPrivateKey();
+      let privateKey = getPrivateKey();
+      
+      // Only prompt if explicitly requested (e.g., from Settings panel)
+      if (!privateKey && forcePrompt) {
+        const userKey = prompt(
+          "Enter your private key for x402 payments (Base Sepolia):\n" +
+          "This will be stored locally and used for workflow execution payments.\n\n" +
+          "⚠️ For demo purposes only. Never use a real wallet with funds!"
+        );
+        
+        if (userKey) {
+          localStorage.setItem("x402_private_key", userKey);
+          privateKey = userKey;
+        }
+      }
+      
       if (!privateKey) {
-        throw new Error("Private key required for x402 payments");
+        // No private key available - this is OK, x402 features just won't work
+        console.log("[x402] No private key configured - x402 payments disabled");
+        return false;
       }
 
       await initializeX402Client(privateKey);
@@ -85,7 +114,9 @@ export function useX402Session() {
       if (!isInitialized) {
         const initialized = await initializeClient();
         if (!initialized) {
-          throw new Error("Failed to initialize x402 client");
+          // Don't throw - just skip x402 features
+          console.warn("[x402] Cannot authorize - no private key configured");
+          return null;
         }
       }
 
@@ -118,26 +149,36 @@ export function useX402Session() {
       setSessionBalance(balanceData.balance || 0);
       setError(null);
     } catch (err) {
-      console.error("[x402] Balance fetch error:", err);
-      setError(err.message);
+      // Don't log error if x402 is not configured - this is expected
+      if (isInitialized) {
+        console.error("[x402] Balance fetch error:", err);
+        setError(err.message);
+      }
     } finally {
       setIsLoadingBalance(false);
     }
-  }, [address]);
+  }, [address, isInitialized]);
 
   // Check if user has sufficient balance for workflow
   const checkBalance = useCallback(
     async (nodeCount, pricePerNode = 0.001) => {
+      if (!isInitialized) {
+        return true; // Skip balance check if x402 not configured
+      }
       await refreshBalance();
       const required = nodeCount * pricePerNode;
       return sessionBalance >= required;
     },
-    [sessionBalance, refreshBalance]
+    [sessionBalance, refreshBalance, isInitialized]
   );
 
-  // Auto-authorize if balance is low
+  // Auto-authorize if balance is low (only if x402 is configured)
   const ensureBalance = useCallback(
     async (nodeCount, pricePerNode = 0.001) => {
+      if (!isInitialized) {
+        return; // Skip if x402 not configured
+      }
+      
       const required = nodeCount * pricePerNode;
       const hasBalance = await checkBalance(nodeCount, pricePerNode);
 
@@ -146,19 +187,19 @@ export function useX402Session() {
         await authorize(DEFAULT_AUTH_AMOUNT);
       }
     },
-    [checkBalance, authorize]
+    [checkBalance, authorize, isInitialized]
   );
 
-  // Initialize on mount if wallet is connected
+  // Initialize on mount ONLY if private key is already available (no prompt)
   useEffect(() => {
-    if (isConnected && address) {
+    if (isConnected && address && hasPrivateKey()) {
       initializeClient().then((success) => {
         if (success) {
           refreshBalance();
         }
       });
     }
-  }, [isConnected, address, initializeClient, refreshBalance]);
+  }, [isConnected, address, hasPrivateKey, initializeClient, refreshBalance]);
 
   return {
     isInitialized,
@@ -171,6 +212,8 @@ export function useX402Session() {
     checkBalance,
     ensureBalance,
     initializeClient,
+    hasPrivateKey,
+    setPrivateKey,
+    clearPrivateKey,
   };
 }
-

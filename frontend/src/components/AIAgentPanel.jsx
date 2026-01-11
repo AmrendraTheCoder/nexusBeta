@@ -180,8 +180,11 @@ export default function AIAgentPanel({ isOpen, onClose, onCreateWorkflow, onAddN
         setGenerationError(null);
         setGenerationResult(null);
 
+        // Use environment variable or fallback to localhost
+        const backendUrl = import.meta.env.VITE_NEXUS_BACKEND_URL || "http://localhost:3001";
+
         try {
-            const response = await fetch("http://localhost:3001/api/ai/generate-workflow", {
+            const response = await fetch(`${backendUrl}/api/ai/generate-workflow`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ prompt: promptText }),
@@ -195,7 +198,8 @@ export default function AIAgentPanel({ isOpen, onClose, onCreateWorkflow, onAddN
                 setGenerationError(data.message || "Failed to generate workflow");
             }
         } catch (error) {
-            setGenerationError("Failed to connect to AI service. Is the backend running?");
+            console.error("[AI Panel] Generation error:", error);
+            setGenerationError("Failed to connect to AI service. Make sure the backend is running on port 3001.");
         } finally {
             setIsGenerating(false);
         }
@@ -205,7 +209,8 @@ export default function AIAgentPanel({ isOpen, onClose, onCreateWorkflow, onAddN
         if (!generationResult?.workflow?.nodes) return;
 
         if (onAddNodes) {
-            onAddNodes(generationResult.workflow.nodes);
+            // Pass both nodes and edges from the generated workflow
+            onAddNodes(generationResult.workflow.nodes, generationResult.workflow.edges || []);
         }
         onClose();
     };
@@ -287,6 +292,27 @@ export default function AIAgentPanel({ isOpen, onClose, onCreateWorkflow, onAddN
                     {/* Text-to-DeFi Mode */}
                     {panelMode === "text-to-defi" && (
                         <div className="space-y-6">
+                            {/* Example Prompts */}
+                            <div className="bg-slate-50 rounded-xl p-4">
+                                <p className="text-xs font-medium text-slate-500 mb-3">Try these examples:</p>
+                                <div className="flex flex-wrap gap-2">
+                                    {[
+                                        "Create an AI trading strategy for BTC with chart analysis",
+                                        "Buy ETH when price drops below $3000",
+                                        "Monitor DeFi yields and auto-rebalance",
+                                        "Scan for arbitrage opportunities across DEXes"
+                                    ].map((example, i) => (
+                                        <button
+                                            key={i}
+                                            onClick={() => setPromptText(example)}
+                                            className="text-xs bg-white px-3 py-1.5 rounded-lg border border-slate-200 text-slate-600 hover:border-violet-300 hover:text-violet-700 transition-colors"
+                                        >
+                                            {example}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
                             {/* Prompt Input */}
                             <div>
                                 <label className="block text-sm font-medium text-slate-700 mb-2">
@@ -295,11 +321,11 @@ export default function AIAgentPanel({ isOpen, onClose, onCreateWorkflow, onAddN
                                 <textarea
                                     value={promptText}
                                     onChange={(e) => setPromptText(e.target.value)}
-                                    placeholder="e.g., Buy ETH when price drops below $3000 and sell when it hits $4000..."
+                                    placeholder="e.g., Create an AI trading strategy that analyzes BTC charts and news sentiment to generate buy/sell signals..."
                                     className="w-full h-32 px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 resize-none text-slate-700 placeholder-slate-400"
                                 />
                                 <p className="text-xs text-slate-500 mt-2">
-                                    Tip: Be specific about tokens, prices, and conditions.
+                                    💡 Tip: Mention "AI trading", "chart analysis", or "news sentiment" for full AI workflows
                                 </p>
                             </div>
 
@@ -328,9 +354,14 @@ export default function AIAgentPanel({ isOpen, onClose, onCreateWorkflow, onAddN
                                         <div className="flex items-center gap-2 text-green-700 font-medium mb-2">
                                             <Sparkles size={16} />
                                             Workflow Generated!
-                                            {generationResult.mode === "demo" && (
-                                                <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full ml-2">
-                                                    Demo Mode
+                                            {generationResult.mode === "fallback" && (
+                                                <span className="text-xs bg-violet-100 text-violet-700 px-2 py-0.5 rounded-full ml-2">
+                                                    Pre-built Template
+                                                </span>
+                                            )}
+                                            {generationResult.mode === "ai" && (
+                                                <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full ml-2">
+                                                    AI Generated
                                                 </span>
                                             )}
                                         </div>
@@ -338,6 +369,11 @@ export default function AIAgentPanel({ isOpen, onClose, onCreateWorkflow, onAddN
                                             Created {generationResult.workflow.nodes.length} nodes with{" "}
                                             {generationResult.workflow.edges?.length || 0} connections.
                                         </p>
+                                        {generationResult.strategyType && (
+                                            <p className="text-xs text-slate-500 mt-1">
+                                                Strategy: <span className="font-medium">{generationResult.strategyType}</span>
+                                            </p>
+                                        )}
                                         {generationResult.message && (
                                             <p className="text-xs text-slate-500 mt-2">{generationResult.message}</p>
                                         )}
