@@ -2,6 +2,8 @@ import React, { useMemo, useCallback } from "react";
 import ReactFlow, { Background, Controls } from "reactflow";
 import CustomNode from "./CustomNode";
 
+const nodeTypes = { custom: CustomNode };
+
 export default function WorkflowCanvas(props) {
   const {
     nodes,
@@ -16,7 +18,6 @@ export default function WorkflowCanvas(props) {
     onInit,
     currentExecutingNode,
   } = props;
-  const nodeTypes = useMemo(() => ({ custom: CustomNode }), []);
 
   // Enhance nodes with execution status
   const enhancedNodes = useMemo(() => {

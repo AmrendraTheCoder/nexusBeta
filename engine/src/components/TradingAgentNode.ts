@@ -190,9 +190,11 @@ export class TradingAgentNode implements Node {
             } else {
               reasoning = "AI signal not strong enough for trade";
             }
+          } else {
+            reasoning = "Prediction data available but missing 24h forecast";
           }
         } else {
-          reasoning = "No AI signal data available";
+          reasoning = "No AI signal data available (Vision API error or missing prediction)";
         }
         break;
 
@@ -206,6 +208,9 @@ export class TradingAgentNode implements Node {
           action = "sell";
           confidence = 0.65;
           reasoning = "MACD bearish crossover detected";
+        } else {
+             action = "hold";
+             reasoning = "Momentum strategy: No clear MACD signal";
         }
         break;
 
