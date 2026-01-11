@@ -40,9 +40,6 @@ const corsOptions = {
 // Enable CORS for all routes
 app.use(cors(corsOptions));
 
-// Handle preflight OPTIONS requests explicitly
-app.options('*', cors(corsOptions));
-
 app.use(express.json());
 
 // x402 Payment endpoints

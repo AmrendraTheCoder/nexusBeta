@@ -109,9 +109,6 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-// Handle preflight OPTIONS requests explicitly
-app.options('*', cors(corsOptions));
-
 app.use(bodyParser.json());
 
 // In-memory fallback database for when MongoDB is unavailable
