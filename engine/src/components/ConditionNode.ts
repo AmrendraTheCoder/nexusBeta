@@ -163,23 +163,57 @@ export class ConditionNode implements Node {
                 }
             }
             
-            expressionString = `${leftValue} ${opSymbol} ${rightValue}`;
-            console.log(`🔍 [Condition] Evaluating: ${leftValue} ${opSymbol} ${rightValue}`);
+            // NEW: Use variable binding for safer evaluation
+            // Instead of interpolating values directly (which breaks strings and security),
+            // we bind the values to temporary variables in the evaluation context.
+            const evalContext = { ...this.inputs, _leftVal: leftValue, _rightVal: rightValue };
+            
+            // Constructs: "_leftVal > _rightVal"
+            expressionString = `_leftVal ${opSymbol} _rightVal`;
+            console.log(`🔍 [Condition] Evaluating: ${expressionString} with values`, { _leftVal: leftValue, _rightVal: rightValue });
+            
+            try {
+                const parser = new Parser();
+                const expr = parser.parse(expressionString);
+                const result = expr.evaluate(evalContext);
+    
+                this.outputs.path = result ? "true-path" : "false-path";
+                console.log(`✅ [Condition] Result: ${result} → ${this.outputs.path}`);
+            } catch (error) {
+                console.error('❌ [Condition] Evaluation error:', error instanceof Error ? error.message : String(error));
+                this.outputs.path = "false-path";
+            }
+            return; // Exit after object-based evaluation
         } else {
             console.error('❌ Invalid condition format:', this.condition);
             this.outputs.path = "false-path";
             return;
         }
 
+        // String expression evaluation (fallthrough for string conditions)
         try {
+            // Sanitize expression to support common operators that expr-eval might not like by default
+            // convert & -> and, | -> or, but be careful about existing 'and'/'or'
+            // parsing "shorthand" operators if they exist in the string
+            const sanitizedExpression = expressionString
+                .replace(/ && /g, ' and ')
+                .replace(/ & /g, ' and ')
+                .replace(/ \|\| /g, ' or ')
+                .replace(/ \| /g, ' or ');
+
+            if (sanitizedExpression !== expressionString) {
+                console.log(`🔧 [Condition] Sanitized expression: "${expressionString}" -> "${sanitizedExpression}"`);
+            }
+
             const parser = new Parser();
-            const expr = parser.parse(expressionString);
+            const expr = parser.parse(sanitizedExpression);
             const result = expr.evaluate(this.inputs);
 
             this.outputs.path = result ? "true-path" : "false-path";
             console.log(`✅ [Condition] Result: ${result} → ${this.outputs.path}`);
         } catch (error) {
             console.error('❌ [Condition] Evaluation error:', error instanceof Error ? error.message : String(error));
+            console.error('   Expression was:', expressionString);
             this.outputs.path = "false-path";
         }
     }
